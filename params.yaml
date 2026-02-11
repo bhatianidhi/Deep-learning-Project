@@ -1,16 +1,8 @@
-
 AUGMENTATION: True                                    
-IMAGE_SIZE: [224, 224, 3] # as per VGG 16 model
+IMAGE_SIZE: [224, 224, 3]   # as per VGG16 model
 BATCH_SIZE: 16
 INCLUDE_TOP: False
 EPOCHS: 1
 CLASSES: 2
-WEIGHTS: imagenet
-LEARNING_RATE: 0.01
-
-
-
-
-
-
-
+WEIGHTS: "imagenet"        # ✅ must be string
+LEARNING_RATE: 0.0001
