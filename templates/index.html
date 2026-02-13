@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Object Classification</title>
+
+<!-- Bootstrap -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+
+<style>
+body{
+    background:#eff2f9;
+}
+h3{
+    color:#1b2d6b;
+    font-weight:700;
+}
+.image-box{
+    height:300px;
+    width:300px;
+    border:2px solid #1b2d6b;
+    margin:auto;
+    position:relative;
+    background:#fff;
+}
+.image-box img{
+    height:100%;
+    width:100%;
+    object-fit:contain;
+    display:none;
+}
+#video{
+    height:100%;
+    width:100%;
+    object-fit:cover;
+}
+.btn-area{
+    width:300px;
+    margin:auto;
+}
+.res-box{
+    border:1px solid #ddd;
+    height:310px;
+    overflow:auto;
+    padding:10px;
+    background:#fff;
+}
+#loading{
+    position:fixed;
+    inset:0;
+    background:rgba(255,255,255,.7);
+    z-index:9999;
+    display:none;
+}
+.loader{
+    position:absolute;
+    top:50%;
+    left:50%;
+    width:60px;
+    height:60px;
+    margin:-30px;
+    border:6px solid #eee;
+    border-top:6px solid #1b2d6b;
+    border-radius:50%;
+    animation:spin 1s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+
+<body>
+
+<div class="container py-4">
+    <h3 class="text-center mb-4">Object Classification</h3>
+
+    <div class="row">
+
+        <!-- LEFT -->
+        <div class="col-md-6 text-center">
+
+            <div class="image-box">
+                <video id="video" autoplay></video>
+                <img id="photo">
+                <canvas id="canvas" style="display:none;"></canvas>
+            </div>
+
+            <div class="btn-area mt-3">
+                <button class="btn btn-primary btn-block mb-2" id="uploadBtn">Upload Image</button>
+                <button class="btn btn-success btn-block" id="predictBtn">Predict</button>
+                <input type="file" id="fileInput" hidden>
+            </div>
+
+        </div>
+
+        <!-- RIGHT -->
+        <div class="col-md-6">
+            <h5 class="text-center mb-3">Prediction Result</h5>
+            <div class="res-box" id="resultBox"></div>
+        </div>
+
+    </div>
+</div>
+
+<div id="loading"><div class="loader"></div></div>
+
+<!-- JS -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+<script>
+/* ================= CONFIG ================= */
+const API_URL = "../predict";   // 🔁 change if needed
+/* ========================================= */
+
+let base64Image = "";
+
+/* Upload */
+$("#uploadBtn").click(()=> $("#fileInput").click());
+
+$("#fileInput").on("change", function(){
+    const file = this.files[0];
+    if(!file) return;
+
+    const reader = new FileReader();
+    reader.onload = e=>{
+        const img = new Image();
+        img.onload = ()=>{
+            const canvas = document.getElementById("canvas");
+            const ctx = canvas.getContext("2d");
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img,0,0);
+            base64Image = canvas.toDataURL("image/jpeg").replace(/^data:image.+;base64,/, "");
+        };
+        img.src = e.target.result;
+
+        $("#photo").attr("src", e.target.result).show();
+        $("#video").hide();
+    };
+    reader.readAsDataURL(file);
+});
+
+/* Predict */
+$("#predictBtn").click(()=>{
+    if(!base64Image){
+        alert("Please upload an image first.");
+        return;
+    }
+
+    $("#loading").show();
+
+    $.ajax({
+        url: API_URL,
+        method: "POST",
+        contentType: "application/json",
+        data: JSON.stringify({image: base64Image}),
+        success: res=>{
+            $("#resultBox").html(`<pre>${JSON.stringify(res, null, 2)}</pre>`);
+        },
+        error: ()=>{
+            $("#resultBox").html("<b>Error connecting to API</b>");
+        },
+        complete: ()=>{
+            $("#loading").hide();
+        }
+    });
+});
+</script>  
+
+</body>
+</html>
