@@ -1,0 +1,146 @@
+schema: '2.0'
+stages:
+  data_ingestion:
+    cmd: python src/cnnClassifier/pipeline/stage_01_data_ingestion.py
+    deps:
+    - path: config/config.yaml
+      hash: md5
+      md5: 863b7a76f87afed46b882be2e95e3c20
+      size: 1120
+    - path: src/cnnClassifier/pipeline/stage_01_data_ingestion.py
+      hash: md5
+      md5: 395464d347a4442dbeab473310a6753b
+      size: 910
+    outs:
+    - path: artifacts/data_ingestion/train
+      hash: md5
+      md5: 8a4f1e558c453ec70858545ee9a74ea3.dir
+      size: 22366791
+      nfiles: 460
+  prepare_base_model:
+    cmd: python src/cnnClassifier/pipeline/stage_02_prepare_base_model.py
+    deps:
+    - path: config/config.yaml
+      hash: md5
+      md5: 863b7a76f87afed46b882be2e95e3c20
+      size: 1120
+    - path: params.yaml
+      hash: md5
+      md5: 2d9a29af47d262556d59ea721b5c43cf
+      size: 237
+    - path: src/cnnClassifier/config/configuration.py
+      hash: md5
+      md5: 2fe373bcb13ed73f49111b79bffab23f
+      size: 4300
+    - path: src/cnnClassifier/pipeline/stage_02_prepare_base_model.py
+      hash: md5
+      md5: dd6f32a04e70093fcc4073cb138cdef2
+      size: 997
+    params:
+      params.yaml:
+        CLASSES: 2
+        IMAGE_SIZE:
+        - 224
+        - 224
+        - 3
+        INCLUDE_TOP: false
+        LEARNING_RATE: 0.0001
+        WEIGHTS: imagenet
+    outs:
+    - path: artifacts/prepare_base_model
+      hash: md5
+      md5: c54ca55a253eb9beb29c441985a2f818.dir
+      size: 118073512
+      nfiles: 2
+  training:
+    cmd: python src/cnnClassifier/pipeline/stage_03_training.py
+    deps:
+    - path: artifacts/data_ingestion/train
+      hash: md5
+      md5: 8a4f1e558c453ec70858545ee9a74ea3.dir
+      size: 22366791
+      nfiles: 460
+    - path: artifacts/prepare_base_model
+      hash: md5
+      md5: c54ca55a253eb9beb29c441985a2f818.dir
+      size: 118073512
+      nfiles: 2
+    - path: config/config.yaml
+      hash: md5
+      md5: 863b7a76f87afed46b882be2e95e3c20
+      size: 1120
+    - path: params.yaml
+      hash: md5
+      md5: 2d9a29af47d262556d59ea721b5c43cf
+      size: 237
+    - path: src/cnnClassifier/components/prepare_callbacks.py
+      hash: md5
+      md5: df047e424075dcab9aec144951712130
+      size: 1006
+    - path: src/cnnClassifier/components/training.py
+      hash: md5
+      md5: a7e562e2b507d9164caefc75f6b5f126
+      size: 5837
+    - path: src/cnnClassifier/config/configuration.py
+      hash: md5
+      md5: 2fe373bcb13ed73f49111b79bffab23f
+      size: 4300
+    - path: src/cnnClassifier/pipeline/stage_03_training.py
+      hash: md5
+      md5: a2d76a0fd23d647d23d34491fd05516d
+      size: 1821
+    params:
+      params.yaml:
+        AUGMENTATION: true
+        BATCH_SIZE: 16
+        EPOCHS: 1
+        IMAGE_SIZE:
+        - 224
+        - 224
+        - 3
+        LEARNING_RATE: 0.0001
+    outs:
+    - path: artifacts/training/model.h5
+      hash: md5
+      md5: 93868692d4958a4f7fe7dc27ccdbd439
+      size: 59551240
+  evaluation:
+    cmd: python src/cnnClassifier/pipeline/stage_04_evaluation.py
+    deps:
+    - path: artifacts/data_ingestion/train
+      hash: md5
+      md5: 8a4f1e558c453ec70858545ee9a74ea3.dir
+      size: 22366791
+      nfiles: 460
+    - path: artifacts/training/model.h5
+      hash: md5
+      md5: 93868692d4958a4f7fe7dc27ccdbd439
+      size: 59551240
+    - path: config/config.yaml
+      hash: md5
+      md5: 863b7a76f87afed46b882be2e95e3c20
+      size: 1120
+    - path: params.yaml
+      hash: md5
+      md5: 2d9a29af47d262556d59ea721b5c43cf
+      size: 237
+    - path: src/cnnClassifier/config/configuration.py
+      hash: md5
+      md5: 2fe373bcb13ed73f49111b79bffab23f
+      size: 4300
+    - path: src/cnnClassifier/pipeline/stage_04_evaluation.py
+      hash: md5
+      md5: 18d8a46a52eb6a0e625b1890cfa263c5
+      size: 883
+    params:
+      params.yaml:
+        BATCH_SIZE: 16
+        IMAGE_SIZE:
+        - 224
+        - 224
+        - 3
+    outs:
+    - path: scores.json
+      hash: md5
+      md5: 294fcbb205667f3879744e1d593ad33f
+      size: 73
